@@ -3,6 +3,7 @@
 #include "player.h"
 #include "sprites.h"
 #include "playfield.h"
+#include "collision.h"
 
 // Move the player
 
@@ -17,6 +18,10 @@ Actor* playerInit(x, y)
         .velY = 0,
         .height = 8,
         .width = 32,
+        .collisionPointX = player.posX + 12,
+        .collisionPointY = player.posY + 7,
+        .colHeight = 25,
+        .colLenght = 8,
         .spr = SPR_addSprite(
                             &playerSpr,
                             x,
@@ -59,19 +64,85 @@ void playerMove(Actor* player)
 
 void playerUpdate(Actor* player)
 {
-    if(!JoyDown(BUTTON_C))
+    if(player->velX != 0 || player->velY != 0)
     {
-        if(JoyDown(BUTTON_RIGHT)) playerSetCoordinates(player, player->posX + 2, player->posY);
-        if(JoyDown(BUTTON_LEFT)) playerSetCoordinates(player, player->posX - 2, player->posY);
-        if(JoyDown(BUTTON_UP)) playerSetCoordinates(player, player->posX, player->posY - 2);
-        if(JoyDown(BUTTON_DOWN)) playerSetCoordinates(player, player->posX, player->posY + 2);
+        playerSetCoordinates(player, player->posX + player->velX, player->posY + player->velY);
     }
-    else
+    
+        if(JoyDown(BUTTON_RIGHT))
+        {
+            player->velX = 2;
+        }
+        if(JoyDown(BUTTON_LEFT))
+        {
+            player->velX = -2;
+        } 
+        if(JoyDown(BUTTON_UP))
+        {
+            player->velY = -2;
+        } 
+        if(JoyDown(BUTTON_DOWN))
+        {
+            player->velY = 2;
+        } 
+
+    if(player, player->velX != 0 || player->velY != 0)
     {
-        if(JoyDown(BUTTON_RIGHT)) playerSetCoordinates(player, player->posX + 1, player->posY);
-        if(JoyDown(BUTTON_LEFT)) playerSetCoordinates(player, player->posX - 1, player->posY);
-        if(JoyDown(BUTTON_UP)) playerSetCoordinates(player, player->posX, player->posY - 1);
-        if(JoyDown(BUTTON_DOWN)) playerSetCoordinates(player, player->posX, player->posY + 1);
+        playerSetCoordinates(player, player->posX + player->velX, player->posY + player->velY);
     }
-    if(MAP_getTile(colmap, (player->posX >> 3) >> 1, (player->posY >> 3) >> 1) == 0) KLog("Collision !");
+
+    // if(MAP_getTile(colmap, (player->posX >> 3) >> 1, (player->posY + 16 >> 3) >> 1) == 0) 
+    // {
+    //     KLog("Collision !");
+    //     playerSetCoordinates(player, ((player->posX >> 3) << 3) + 8, player->posY);
+    // }   
+    // if(MAP_getTile(colmap, (player->posX + player->width >> 3) >> 1, (player->posY + 16 >> 3) >> 1) == 0) 
+    // {
+    //     KLog("Collision !");
+    //     playerSetCoordinates(player, ((player->posX >> 3) << 3), player->posY);
+    // }
+    // if(MAP_getTile(colmap, (player->posX + 16 >> 3) >> 1, (player->posY >> 3) >> 1) == 0) 
+    // {
+    //     KLog("Collision !");
+    //     playerSetCoordinates(player, player->posX, ((player->posY >> 3) << 3) + 8);
+    // }
+    // if(MAP_getTile(colmap, (player->posX + 16 >> 3) >> 1, (player->posY + 32 >> 3) >> 1) == 0) 
+    // {
+    //     KLog("Collision !");
+    //     playerSetCoordinates(player, player->posX, ((player->posY >> 3) << 3));
+    // }
+
+    // if(isTileSolid(player->posX, player->posY, player->posX + 32, player->posY + 32, colmap)) KLog("Collision!");
+
+
+    //Vertical Collisions
+    if(MAP_getTile(colmap, (player->posX >> 3) >> 1, (player->posY >> 3) >> 1) == 0 && player->posX - (player->posX >> 3) >> 1 > 0) 
+    {
+        KLog("Collision !");
+        playerSetCoordinates(player, ((player->posX >> 3) << 3) + 8, player->posY);
+    }
+
+    else if(MAP_getTile(colmap, (player->posX + 32 >> 3) >> 1, (player->posY + 32 >> 3) >> 1) == 0 && player->posX + 32 - (player->posX + 32 >> 3) >> 1 > 0) 
+    {
+        KLog("Collision !");
+        playerSetCoordinates(player, ((player->posX >> 3) << 3), player->posY);
+    }
+
+    //Horizontal Collisions
+    else if(MAP_getTile(colmap, (player->posX >> 3) >> 1, (player->posY >> 3) >> 1) == 0 && player->posY - (player->posY >> 3) >> 1 > 0) 
+    {
+        KLog("Collision !");
+        playerSetCoordinates(player, player->posX, ((player->posY >> 3) << 3) + 8);
+    }
+
+    else if(MAP_getTile(colmap, (player->posX + 32 >> 3) >> 1, (player->posY + 32 >> 3) >> 1) == 0 && player->posY + 32 - (player->posY + 32 >> 3) >> 1 > 0) 
+    {
+        KLog("Collision !");
+        playerSetCoordinates(player, player->posX, ((player->posY >> 3) << 3));
+    }
+
+    player->velX = 0;
+    player->velY = 0;
+    
+    
 }

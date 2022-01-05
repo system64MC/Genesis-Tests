@@ -18,6 +18,10 @@ typedef struct
     s16 velY;   // velocity in Y cordinates
     s16 width;  // width of the sprite
     s16 height; // height of the sprite
+    u8 collisionPointX;
+    u8 collisionPointY;
+    u8 colLenght;
+    u8 colHeight;
     // pointing to the sprite
     Sprite* spr;// pointer to the sprite
 } Actor;

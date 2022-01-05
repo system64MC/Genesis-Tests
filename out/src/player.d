@@ -10,4 +10,4 @@ out/src/player.o: src/player.c C:/sgdk/inc/genesis.h C:/sgdk/inc/config.h \
  C:/sgdk/inc/sprite_eng.h C:/sgdk/inc/sound.h C:/sgdk/inc/xgm.h \
  C:/sgdk/inc/z80_ctrl.h C:/sgdk/inc/ym2612.h C:/sgdk/inc/psg.h \
  C:/sgdk/inc/joy.h C:/sgdk/inc/timer.h inc/actor.h inc/player.h \
- inc/actor.h res/sprites.h inc/playfield.h
+ inc/actor.h res/sprites.h inc/playfield.h inc/collision.h
