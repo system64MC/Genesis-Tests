@@ -13,12 +13,18 @@
 #include<kdebug.h>
 #include "../res/map.h"
 #include "playfield.h"
+#include <psg.h>
+#include "bullet.h"
 
 Map* map;
 int tileIndex = TILE_USERINDEX;
 
 int main()
 {
+    // PSG_init();
+    // PSG_setEnvelope(1, 0);
+    // PSG_setFrequency(1, 10);
+    
     KLog("TEST");
     init();
     VDP_loadTileSet(&testMapColTs, TILE_USERINDEX, DMA);

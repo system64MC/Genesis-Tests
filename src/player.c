@@ -4,10 +4,15 @@
 #include "sprites.h"
 #include "playfield.h"
 #include "collision.h"
+#include "utils.h"
+// #include <psg.h>
 
 // Move the player
 
 // inits the player at xy coordinates and returns a pointer to the player struct
+s8 grav = 8;
+s8 gravcheck = 0;
+
 Actor* playerInit(x, y)
 {
     Actor player = {
@@ -64,281 +69,99 @@ void playerMove(Actor* player)
 
 void playerUpdate(Actor* player)
 {
-    if(player->velX != 0 || player->velY != 0)
-    {
-        playerSetCoordinates(player, player->posX + player->velX, player->posY + player->velY);
-    }
+    // if(player->velX != 0 || player->velY != 0)
+    // {
+    //     playerSetCoordinates(player, player->posX + player->velX, player->posY + player->velY);
+    // }
+        // player->velY = 0;
     
         if(JoyDown(BUTTON_RIGHT))
         {
-            player->velX = 2;
+            player->velX = 4;
         }
         if(JoyDown(BUTTON_LEFT))
         {
-            player->velX = -2;
+            player->velX = -4;
         } 
         if(JoyDown(BUTTON_UP))
         {
-            player->velY = -2;
+            player->velY -= grav;
         } 
-        if(JoyDown(BUTTON_DOWN))
+
+        if(JoyDown(BUTTON_A) && gravcheck == 0)
         {
-            player->velY = 2;
-        } 
+            grav *= -1;
+	    gravcheck = 1;
+        }
+	if(!JoyDown(BUTTON_A))
+        {
+	    gravcheck = 0;
+        }
+
+    // if(player, player->velX != 0 || player->velY != 0)
+    // {
+    //     playerSetCoordinates(player, player->posX + player->velX, player->posY + player->velY);
+    // }
+
+    // calcul de la boite de collision
+
+    s16 x1 = player->posX + 8, y1 = player->posY + 4;
+    s16 x2 = player->posX + 24, y2 = player->posY + 31;
+    
+    // calcul des positions de tests
+    const s16 hTests[3] = {y1, y2-1, y1 + 16};
+    const s16 vTests[2] = {x1, x2-1};
+
+    s16 correct = 0;
+
+    if(player->velX > 0) {
+        correct = getCollisionPosX(x2 + player->velX, hTests, 3);
+        player->velX -= correct;
+    } else if(player->velX < 0) {
+        correct = getCollisionPosX(x1 + player->velX, hTests, 3);  
+        player->velX += (16 - correct)&0xF;
+    }
+
+    if(player->velY > 0) {
+        // le 3ieme paramètres jte l'ai écrit différemment, c'est un méthode safe... c'est possible d'en faire une macro qui se nommerait len(...)
+        correct = getCollisionPosY(vTests, y2 + player->velY, (sizeof(vTests)/sizeof(__typeof__(*vTests))));
+        player->velY -= correct;
+    } else if(player->velY < 0) {
+        correct = getCollisionPosY(vTests, y1 + player->velY, 2);  
+        player->velY += (16 - correct)&0xF;
+    }
 
     if(player, player->velX != 0 || player->velY != 0)
     {
         playerSetCoordinates(player, player->posX + player->velX, player->posY + player->velY);
     }
 
-    int tempX = player->posX + player->velX;
-
-
-
-    /*
-    // en x
-    si collision à à x+8, x+24 (y = 0) et à y = 32
-        faireLaCorrection()
-    else
-   j    eVérifieEntre() // points verts
-
-    // en y
-    si collision à x+8 et y+1 et idem à y = 31
-        faireLaCorrection()
-    else
-        jeVérifieEntre() // points rouges
-    */
-
-   //X Collisions
-    if(MAP_getTile(colmap, (tempX + 8 >> 3) >> 1, (player->posY + 1 >> 3) >> 1) == 0) 
-    {
-        KLog("Collision !");
-        
-        if(player->velX > 0)
-        {
-            // int dest = player->posX + player->velX;
-            int correct = tempX & 7;
-            player->velX -= correct;
-        }
-        else if(player->velX < 0)
-        {
-            int correct = tempX & 7;
-            player->velX += correct;
-        }
-
-        //playerSetCoordinates(player, ((player->posX >> 3) << 3) + 8, player->posY);
-
-    }
-    else if(MAP_getTile(colmap, (tempX + 24 >> 3) >> 1, (player->posY + 1 >> 3) >> 1) == 0) 
-    {
-        KLog("Collision !");
-        
-        if(player->velX > 0)
-        {
-            // int dest = player->posX + player->velX;
-            int correct = tempX & 7;
-            player->velX -= correct;
-        }
-        else if(player->velX < 0)
-        {
-            int correct = tempX & 7;
-            player->velX += correct;
-        }
-
-        //playerSetCoordinates(player, ((player->posX >> 3) << 3) + 8, player->posY);
-    }
-    else if(MAP_getTile(colmap, (tempX + 8 >> 3) >> 1, (player->posY + 31 >> 3) >> 1) == 0) 
-    {
-        KLog("Collision !");
-        
-        if(player->velX > 0)
-        {
-            // int dest = player->posX + player->velX;
-            int correct = tempX & 7;
-            player->velX -= correct;
-        }
-        else if(player->velX < 0)
-        {
-            int correct = tempX & 7;
-            player->velX += correct;
-        }
-
-        //playerSetCoordinates(player, ((player->posX >> 3) << 3) + 8, player->posY);
-    }
-    else if(MAP_getTile(colmap, (tempX + 24 >> 3) >> 1, (player->posY + 31 >> 3) >> 1) == 0) 
-    {
-        KLog("Collision !");
-        
-        if(player->velX > 0)
-        {
-            // int dest = player->posX + player->velX;
-            int correct = tempX & 7;
-            player->velX -= correct;
-        }
-        else if(player->velX < 0)
-        {
-            int correct = tempX & 7;
-            player->velX += correct;
-        }
-
-        //playerSetCoordinates(player, ((player->posX >> 3) << 3) + 8, player->posY);
-    }
-
-    // Checking between the edges
-    else if(MAP_getTile(colmap, (tempX + 8 >> 3) >> 1, (player->posY + 16 >> 3) >> 1) == 0)
-    {
-        /* code de correction*/
-        KLog("Collision !");
-        
-        if(player->velX > 0)
-        {
-            // int dest = player->posX + player->velX;
-            int correct = tempX & 7;
-            player->velX -= correct;
-        }
-        else if(player->velX < 0)
-        {
-            int correct = tempX & 7;
-            player->velX += correct;
-        }
-    }
-    else if(MAP_getTile(colmap, (tempX + 24 >> 3) >> 1, (player->posY + 16 >> 3) >> 1) == 0)
-    {
-        /* code de correction*/
-        KLog("Collision !");
-        
-        if(player->velX > 0)
-        {
-            // int dest = player->posX + player->velX;
-            int correct = tempX & 7;
-            player->velX -= correct;
-        }
-        else if(player->velX < 0)
-        {
-            int correct = tempX & 7;
-            player->velX += correct;
-        }
-    }
-
-
-    int tempY = player->posY + player->velY;
-
-//Y Collisions
-    if(MAP_getTile(colmap, (player->posX + 8 >> 3) >> 1, (tempY >> 3) >> 1) == 0) 
-    {
-        KLog("Collision !");
-        
-        if(player->velY > 0)
-        {
-            // int dest = player->posX + player->velX;
-            int correct = tempY & 7;
-            player->velY -= correct;
-        }
-        else if(player->velY < 0)
-        {
-            int correct = tempY & 7;
-            player->velY += correct;
-        }
-
-        //playerSetCoordinates(player, ((player->posX >> 3) << 3) + 8, player->posY);
-
-    }
-    else if(MAP_getTile(colmap, (player->posX + 24 >> 3) >> 1, (tempY >> 3) >> 1) == 0) 
-    {
-        KLog("Collision !");
-        
-        if(player->velY > 0)
-        {
-            // int dest = player->posX + player->velX;
-            int correct = tempY & 7;
-            player->velY -= correct;
-        }
-        else if(player->velY < 0)
-        {
-            int correct = tempY & 7;
-            player->velY += correct;
-        }
-
-        //playerSetCoordinates(player, ((player->posX >> 3) << 3) + 8, player->posY);
-    }
-    else if(MAP_getTile(colmap, (player->posX + 8 >> 3) >> 1, (tempY + 32 >> 3) >> 1) == 0) 
-    {
-        KLog("Collision !");
-        
-        if(player->velY > 0)
-        {
-            // int dest = player->posX + player->velX;
-            int correct = tempY & 7;
-            player->velY -= correct;
-        }
-        else if(player->velY < 0)
-        {
-            int correct = tempY & 7;
-            player->velY += correct;
-        }
-
-        //playerSetCoordinates(player, ((player->posX >> 3) << 3) + 8, player->posY);
-    }
-    else if(MAP_getTile(colmap, (player->posX + 24 >> 3) >> 1, (tempY + 32 >> 3) >> 1) == 0) 
-    {
-        KLog("Collision !");
-        
-        if(player->velY > 0)
-        {
-            // int dest = player->posX + player->velX;
-            int correct = tempY & 7;
-            player->velY -= correct;
-        }
-        else if(player->velY < 0)
-        {
-            int correct = tempY & 7;
-            player->velY += correct;
-        }
-
-        //playerSetCoordinates(player, ((player->posX >> 3) << 3) + 8, player->posY);
-    }
-
-    // // Checking between the edges
-    // else if(MAP_getTile(colmap, (tempX + 8 >> 3) >> 1, (player->posY + 16 >> 3) >> 1) == 0)
-    // {
-    //     /* code de correction*/
-    //     KLog("Collision !");
-        
-    //     if(player->velX > 0)
-    //     {
-    //         // int dest = player->posX + player->velX;
-    //         int correct = tempX & 7;
-    //         player->velX -= correct;
-    //     }
-    //     else if(player->velX < 0)
-    //     {
-    //         int correct = tempX & 7;
-    //         player->velX += correct;
-    //     }
-    // }
-    // else if(MAP_getTile(colmap, (tempX + 24 >> 3) >> 1, (player->posY + 16 >> 3) >> 1) == 0)
-    // {
-    //     /* code de correction*/
-    //     KLog("Collision !");
-        
-    //     if(player->velX > 0)
-    //     {
-    //         // int dest = player->posX + player->velX;
-    //         int correct = tempX & 7;
-    //         player->velX -= correct;
-    //     }
-    //     else if(player->velX < 0)
-    //     {
-    //         int correct = tempX & 7;
-    //         player->velX += correct;
-    //     }
-    // }
-
-
-    playerSetCoordinates(player, player->posX + player->velX, player->posY + player->velY);
-
     player->velX = 0;
-    player->velY = 0;
+    player->velY = grav;
     
     
+}
+
+s16 getCollisionPosX(s16 x, s16* ys, u16 array_size) {
+    s16 tx = x>>4;
+    while(array_size > 0) {
+        array_size--;
+        if(MAP_getTile(colmap, tx, *ys>>4) == 0) {
+            return x & 15;
+        }
+        ys++;
+    }
+    return 0;
+}
+
+s16 getCollisionPosY(s16* xs, s16 y, u16 array_size) {
+    s16 ty = y>>4;
+    while(array_size > 0) {
+        array_size--;
+        if(MAP_getTile(colmap, *xs>>4, ty) == 0) {
+            return y & 15;
+        }
+        xs++;
+    }
+    return 0;
 }

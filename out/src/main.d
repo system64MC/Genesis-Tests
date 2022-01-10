@@ -11,4 +11,5 @@ out/src/main.o: src/main.c C:/sgdk/inc/genesis.h C:/sgdk/inc/config.h \
  C:/sgdk/inc/z80_ctrl.h C:/sgdk/inc/ym2612.h C:/sgdk/inc/psg.h \
  C:/sgdk/inc/joy.h C:/sgdk/inc/timer.h inc/init.h inc/player.h \
  inc/actor.h inc/actor.h inc/joy.h inc/update.h res/sprites.h \
- C:/sgdk/inc/kdebug.h src/../res/map.h inc/playfield.h
+ C:/sgdk/inc/kdebug.h src/../res/map.h inc/playfield.h C:/sgdk/inc/psg.h \
+ inc/bullet.h
